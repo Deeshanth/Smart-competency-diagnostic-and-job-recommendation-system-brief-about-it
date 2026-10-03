@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Competency Diagnostic & Job Recommendation System</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-logo">
+          <i data-lucide="brain-circuit"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Competency Diagnostic <span class="gradient-text">& Job Recommendation Engine</span></h1>
+          <p class="brand-subtitle">AI-Driven Skills Assessment, Competency Profiling & Career Roadmap</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Preset Profiles Dropdown -->
+        <div class="preset-selector">
+          <label><i data-lucide="sparkles"></i> Try Sample Profile:</label>
+          <select id="presetSelect" onchange="app.loadPresetProfile(this.value)">
+            <option value="">-- Choose Demo Profile --</option>
+            <option value="example_student">☁️ Student (Python + SQL + Cloud + Problem Solving)</option>
+            <option value="web_dev">💻 Junior Web Developer (JS + React + HTML/CSS)</option>
+            <option value="data_enthusiast">📊 Data Enthusiast (Python + Pandas + SQL + Stats)</option>
+            <option value="ai_aspirant">🤖 AI/ML Aspirant (Python + Math + ML Fundamentals)</option>
+            <option value="clear">🧹 Clear All Data</option>
+          </select>
+        </div>
+        
+        <button class="btn btn-outline" onclick="app.openReportModal()">
+          <i data-lucide="file-text"></i> Diagnostic Report
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="assessment" onclick="app.switchTab('assessment')">
+        <i data-lucide="clipboard-check"></i>
+        <span>1. User Assessment</span>
+        <span class="badge-dot" id="assessmentDot"></span>
+      </button>
+
+      <button class="nav-tab" data-tab="competency" onclick="app.switchTab('competency')">
+        <i data-lucide="radar"></i>
+        <span>2. Competency Analysis</span>
+      </button>
+
+      <button class="nav-tab" data-tab="recommendations" onclick="app.switchTab('recommendations')">
+        <i data-lucide="briefcase"></i>
+        <span>3. AI Job Matching</span>
+        <span class="tab-badge" id="matchBadge">0 Roles</span>
+      </button>
+
+      <button class="nav-tab" data-tab="roadmap" onclick="app.switchTab('roadmap')">
+        <i data-lucide="map"></i>
+        <span>4. Skill Gap & Roadmap</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- TAB 1: USER ASSESSMENT -->
+      <section id="tab-assessment" class="tab-pane active">
+        <div class="pane-header">
+          <div>
+            <h2><i data-lucide="user-check"></i> Step 1: User Assessment & Profile Entry</h2>
+            <p>Select your skills, rate your proficiency, log education/projects, and take quick diagnostic quizzes.</p>
+          </div>
+          <div class="assessment-progress">
+            <span id="skillsCountBadge">0 Skills Selected</span>
+          </div>
+        </div>
+
+        <div class="assessment-grid">
+          
+          <!-- Column 1: Skill Selection & Proficiency -->
+          <div class="card glass-card">
+            <div class="card-header">
+              <h3><i data-lucide="cpu"></i> Skills & Proficiency Rating</h3>
+              <p class="card-desc">Click skills to add them to your profile and adjust proficiency stars (1 = Beginner, 5 = Expert).</p>
+            </div>
+            
+            <!-- Skill Category Filters -->
+            <div class="skill-category-tabs" id="skillCategoryTabs">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Skill Tags Palette -->
+            <div class="skill-palette" id="skillPalette">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Selected Skills List with Level Sliders -->
+            <div class="selected-skills-section">
+              <div class="section-title">
+                <h4>Selected Skills (<span id="selectedCount">0</span>)</h4>
+                <button class="btn-text" onclick="app.clearSkills()"><i data-lucide="trash-2"></i> Clear</button>
+              </div>
+              <div id="selectedSkillsList" class="selected-skills-list">
+                <div class="empty-state">
+                  <i data-lucide="mouse-pointer-click"></i>
+                  <p>No skills selected yet. Click any skill tag above or load a sample profile!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Diagnostic Quiz & Background Info -->
+          <div class="assessment-right-col">
+            
+            <!-- Education, Experience & Projects -->
+            <div class="card glass-card">
+              <div class="card-header">
+                <h3><i data-lucide="graduation-cap"></i> Education & Experience Background</h3>
+              </div>
+              
+              <div class="form-group">
+                <label for="educationLevel">Education Level</label>
+                <select id="educationLevel" onchange="app.updateBackgroundData()">
+                  <option value="bachelor_cs">Bachelor's Degree (Computer Science / IT)</option>
+                  <option value="bachelor_other">Bachelor's Degree (Non-CS / Engineering)</option>
+                  <option value="master">Master's / Postgraduate</option>
+                  <option value="bootcamp">Coding Bootcamp / Self-Taught</option>
+                  <option value="highschool">High School / Undergraduate</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="expYears">Experience Level</label>
+                  <select id="expYears" onchange="app.updateBackgroundData()">
+                    <option value="0">Student / Fresh Graduate (0 yrs)</option>
+                    <option value="1-2">Junior (1-2 yrs)</option>
+                    <option value="3-5">Mid-Level (3-5 yrs)</option>
+                    <option value="5+">Senior / Lead (5+ yrs)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="workPreference">Work Style Preference</label>
+                  <select id="workPreference" onchange="app.updateBackgroundData()">
+                    <option value="remote">Fully Remote</option>
+                    <option value="hybrid">Hybrid</option>
+                    <option value="onsite">On-site / Office</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Key Completed Projects & Domain Exposure</label>
+                <div class="project-chips" id="projectChips">
+                  <!-- Dynamically generated project exposure tags -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Domain Knowledge Quick Diagnostic Quiz -->
+            <div class="card glass-card quiz-card">
+              <div class="card-header">
+                <h3><i data-lucide="help-circle"></i> Quick Diagnostic Verification Quiz</h3>
+                <p class="card-desc">Take a quick 3-question quiz to objectively verify your competency in core domains.</p>
+              </div>
+
+              <div class="quiz-selector-bar">
+                <label>Select Domain:</label>
+                <select id="quizDomainSelect" onchange="app.loadDomainQuiz(this.value)">
+                  <option value="cloud">Cloud & Infrastructure ☁️</option>
+                  <option value="backend">Backend & Databases 💻</option>
+                  <option value="data">Data Analysis & SQL 📊</option>
+                  <option value="frontend">Web & Frontend ⚡</option>
+                </select>
+              </div>
+
+              <div id="quizContainer" class="quiz-container">
+                <!-- Dynamically injected quiz content -->
+              </div>
+            </div>
+            
+            <!-- Quick Proceed Button -->
+            <button class="btn btn-primary btn-block btn-lg" onclick="app.analyzeAndProceed()">
+              Analyze Competency & Match Jobs <i data-lucide="arrow-right"></i>
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: COMPETENCY ANALYSIS -->
+      <section id="tab-competency" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h2><i data-lucide="radar"></i> Step 2: Competency Analysis & Skill Profile</h2>
+            <p>Comprehensive breakdown of your technical strengths, proficiency levels, and cross-domain competency radar.</p>
+          </div>
+          <button class="btn btn-outline" onclick="app.switchTab('recommendations')">
+            View Job Matches <i data-lucide="chevron-right"></i>
+          </button>
+        </div>
+
+        <div class="competency-grid">
+          
+          <!-- Radar Chart Card -->
+          <div class="card glass-card radar-card">
+            <div class="card-header center-text">
+              <h3><i data-lucide="pie-chart"></i> Competency Radar Matrix</h3>
+              <p class="card-desc">Calculated across 8 key technology domains (0-100%)</p>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="competencyCanvas" width="440" height="440"></canvas>
+            </div>
+            <div class="overall-readiness">
+              <div class="readiness-score">
+                <span class="score-num" id="overallScoreNum">0%</span>
+                <span class="score-label">Overall Readiness Index</span>
+              </div>
+              <div class="readiness-badge" id="overallReadinessBadge">Analyzing...</div>
+            </div>
+          </div>
+
+          <!-- Strengths & Weaknesses Breakdown -->
+          <div class="competency-details">
+            
+            <!-- Domain Proficiency Bars -->
+            <div class="card glass-card">
+              <div class="card-header">
+                <h3><i data-lucide="bar-chart-2"></i> Domain Mastery Breakdown</h3>
+              </div>
+              <div class="domain-bars" id="domainBarsContainer">
+                <!-- Dynamically populated bars -->
+              </div>
+            </div>
+
+            <!-- Strengths & Weaknesses Matrix -->
+            <div class="matrix-grid">
+              
+              <div class="card glass-card status-card card-strengths">
+                <div class="card-header">
+                  <h3><i data-lucide="check-circle-2"></i> Key Strengths & Superpowers</h3>
+                </div>
+                <div id="strengthsList" class="matrix-list">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+              <div class="card glass-card status-card card-gaps">
+                <div class="card-header">
+                  <h3><i data-lucide="alert-triangle"></i> Identified Skill Gaps</h3>
+                </div>
+                <div id="gapsList" class="matrix-list">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 3: AI JOB MATCHING -->
+      <section id="tab-recommendations" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h2><i data-lucide="briefcase"></i> Step 3: AI Job Recommendations & Role Matching</h2>
+            <p>Comparing your competency profile against real-world engineering and tech job requirements.</p>
+          </div>
+          <div class="filter-controls">
+            <label><i data-lucide="filter"></i> Sort By:</label>
+            <select id="roleSortSelect" onchange="app.renderJobRecommendations()">
+              <option value="match">Highest Match %</option>
+              <option value="salary">Salary Range</option>
+              <option value="demand">Market Demand</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Job Cards Grid -->
+        <div class="job-cards-grid" id="jobCardsGrid">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- TAB 4: SKILL GAP & ROADMAP -->
+      <section id="tab-roadmap" class="tab-pane">
+        <div class="pane-header">
+          <div>
+            <h2><i data-lucide="map-pin"></i> Step 4: Skill Improvement & Career Action Plan</h2>
+            <p>Personalized step-by-step roadmap to qualify for top-tier roles and close competency gaps.</p>
+          </div>
+          
+          <div class="target-role-picker">
+            <label><i data-lucide="target"></i> Target Career Goal:</label>
+            <select id="targetRoleSelect" onchange="app.setTargetRole(this.value)">
+              <!-- Dynamically populated role choices -->
+            </select>
+          </div>
+        </div>
+
+        <div id="roadmapContent">
+          <!-- Dynamically generated target role summary, skill gaps, certifications, courses, and action plan -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Candidate Diagnostic Report Modal -->
+    <div id="reportModal" class="modal-overlay hidden">
+      <div class="modal-card glass-card">
+        <div class="modal-header">
+          <div class="modal-title">
+            <i data-lucide="award"></i>
+            <h2>Official Competency Diagnostic Report</h2>
+          </div>
+          <button class="btn-icon" onclick="app.closeReportModal()"><i data-lucide="x"></i></button>
+        </div>
+        
+        <div class="modal-body" id="reportModalBody">
+          <!-- Formatted printable report content -->
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="window.print()"><i data-lucide="printer"></i> Print / Save PDF</button>
+          <button class="btn btn-primary" onclick="app.closeReportModal()">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
